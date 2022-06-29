@@ -1,7 +1,40 @@
 <% layout (`layouts/boilerplate.ejs`)%>
-<h1><%=findCamp.title%></h1>
+<div class="row">
+    <div class="col-6 offset-3">
+        <div class="card mb-3">
+            <img src="<%=findCamp.image%>" class="card-img-top" alt="Not loaded">
+            <div class="card-body">
+                <h5 class="card-title"><%=findCamp.title%></h5>
+
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Location: <%=findCamp.location%></li>
+                <li class="list-group-item">Price: $<%=findCamp.price%>/night</li>
+                <li class="list-group-item">Description: <%=findCamp.description%></li>
+            </ul>
+            <div class="card-body ">
+                <a class="btn btn-primary" href="/campgrounds/<%=findCamp._id%>/edit" class="card-link">Edit</a>
+
+                <form class="d-inline" method="POST" action="/campgrounds/<%=findCamp._id%>?_method=DELETE">
+                    <button class="btn btn-primary">Delete</button>
+                </form>
+
+                <a class="btn btn-primary" href="/campgrounds" class="card-link">Back</a>
+            </div>
+            <div class="card-footer text-muted">
+                2 days ago
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- <h1><%=findCamp.title%></h1>
 <h2><%=findCamp.location%></h2>
 <img src="<%=findCamp.image%>">
+<h1>Price: $<%=findCamp.price%>/night</h1>
 <h3><%=findCamp.description%></h3>
 <p><a href="/campgrounds">Back to all campgrounds</a></p>
 
@@ -10,4 +43,4 @@
 
 <form method="POST" action="/campgrounds/<%=findCamp._id%>?_method=DELETE">
     <button>Delete</button>
-</form>
+</form> -->

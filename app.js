@@ -5,7 +5,7 @@ const path = require(`path`)
 const ExpressError = require(`./utils/ExpressError.js`)
 const catchAsync = require(`./utils/catchAsync`)
 const ejsMate = require(`ejs-mate`)
-const { campgroundSchema } = require("./schema.js")
+const { campgroundSchema, reviewSchema } = require("./schema.js")
 
 
 app.engine(`ejs`, ejsMate)
@@ -24,6 +24,7 @@ mongoose.connect("mongodb://localhost:27017/yelp-camp", {
 
 //呼叫Schema
 const Campground = require(`./models/campground.js`);
+const Review = require("./models/review.js")
 const req = require("express/lib/request");
 const AppError = require('./utils/ExpressError.js');
 
@@ -34,7 +35,7 @@ db.once("open", () => {
     console.log("Database connected")
 })
 const SchemaValidation = (req, res, next) => {
-    console.log(campgroundSchema)
+
     const { error } = campgroundSchema.validate(req.body);
 
     if (error) {
@@ -45,6 +46,20 @@ const SchemaValidation = (req, res, next) => {
         next()
     }
 }
+
+const validateReview = (req, res, next) => {
+    const { error } = reviewSchema.validate(req.body);
+    if (error) {
+        const reviewError = error.details.map(el => el.message).join(",")
+        throw new ExpressError(reviewError, 400)
+    }
+    else {
+        next();
+    }
+
+}
+
+
 app.get(`/campgrounds`, catchAsync(async (req, res) => {
     const campgrounds = await Campground.find({})
     res.render(`campgrounds/index.ejs`, { campgrounds })
@@ -96,7 +111,18 @@ app.delete(`/campgrounds/:id`, catchAsync(async (req, res) => {
 })
 )
 
-app.all(`*`, (req, res, next) => {
+app.post("/campgrounds/:id/reviews", validateReview, catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const campground = await Campground.findById(id)
+    const newReviews = new Review(req.body.review)
+    campground.reviews.push(newReviews);
+    await campground.save();
+    await newReviews.save();
+    res.redirect(`/campgrounds/${campground._id}`)
+
+}))
+
+app.all(`* `, (req, res, next) => {
     next(new ExpressError("Page not found", 404))
 })
 

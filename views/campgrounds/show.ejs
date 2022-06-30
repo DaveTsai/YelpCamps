@@ -25,5 +25,40 @@
                 2 days ago
             </div>
         </div>
+        <h2>Share your review</h2>
+        <form class="needs-validation" method="POST" action="/campgrounds/<%=campground._id%>/reviews" novalidate>
+            <div class="mb-3">
+                <label for="rating" class="form-label">Rating</label>
+                <input type="range" class="form-range" id="rating" name="rating" min="1" max="5">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label " for="body">Review:</label>
+                <textarea name="body" id="body" cols="10" rows="5" class="form-control" placeholder="Share with us"
+                    required></textarea>
+            </div>
+            <button class="btn btn-primary mb-3" type="submit">Submit</button>
+        </form>
+
     </div>
 </div>
+<script>
+    (() => {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        const forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>

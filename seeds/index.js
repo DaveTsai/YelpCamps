@@ -3,7 +3,7 @@ const mongoose = require(`mongoose`);
 const Campground = require(`../models/campground.js`);
 const cities = require(`./cities.js`)
 const { places, descriptors } = require(`./seedHelpers`);
-const axios = require(`axios`)
+
 
 mongoose.connect("mongodb://localhost:27017/yelp-camp", {
     useNewUrlParser: true,
@@ -31,7 +31,7 @@ const seedDB = async () => {
         const camp = new Campground({
             location: `${cities[random1000].city},${cities[random1000].state}`
             , title: `${sample(descriptors)} ${sample(places)}`,
-            image: `https://source.unsplash.com/collection/483251`,
+            image: `https://picsum.photos/400`,
             description: `Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy.`,
             price
 

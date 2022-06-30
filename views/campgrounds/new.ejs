@@ -2,22 +2,29 @@
 <div class="row">
     <h1 class="text-center">New campground</h1>
     <div class="col-6 offset-3">
-        <form action="/campgrounds" method="post">
+        <form action="/campgrounds" method="post" class="needs-validation" novalidate>
             <div class="mb-3">
                 <label class="form-label" for="title">Name:</label>
-                <input class="form-control" type="text" id="title" name="title">
-
+                <input class="form-control" type="text" id="title" name="title" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label" for="location">Location:</label>
-                <input class="form-control" type="text" id="location" name="location">
-
+                <input class="form-control" type="text" id="location" name="location" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label" for="image">Image Url</label>
-                <input class="form-control" type="text" id="image" name="image">
+                <input class="form-control" type="text" id="image" name="image" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
             </div>
 
             <div class="col-3">
@@ -26,15 +33,19 @@
             <div class="input-group mb-3">
                 <span class="input-group-text">$</span>
                 <input id="price" type="text" class="form-control" aria-label="Amount (to the nearest dollar)"
-                    name="price">
+                    name="price" required>
                 <span class="input-group-text">.00</span>
-
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label" for="image">Description</label>
-                <textarea class="form-control" type="text" id="description" name="description"></textarea>
-
+                <textarea class="form-control" type="text" id="description" name="description" required></textarea>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
             </div>
 
             <input class="btn btn-primary mt-3" type="submit" value="Submit">
@@ -42,3 +53,24 @@
         <div class="mt-3"><a href="/campgrounds">Back to all campgrounds</a></div>
     </div>
 </div>
+
+<script>
+    (() => {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        const forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>

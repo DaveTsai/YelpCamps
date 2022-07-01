@@ -6,6 +6,8 @@ const ExpressError = require(`./utils/ExpressError.js`)
 const catchAsync = require(`./utils/catchAsync`)
 const ejsMate = require(`ejs-mate`)
 const { campgroundSchema, reviewSchema } = require("./schema.js")
+const session = require("express-session")
+const flash = require("connect-flash")
 
 
 app.engine(`ejs`, ejsMate)
@@ -13,13 +15,34 @@ app.set(`views`, path.join(__dirname, `views`))
 app.set(`view engine`, `ejs`)
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'))
+app.use(express.static(path.join(__dirname, `public`)))
+
+const sessionConfig = {
+    secret: "Thisisasecret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true
+    }
+}
+app.use(session(sessionConfig))
+app.use(flash())
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash("successTag");
+    res.locals.error = req.flash("errorTag")
+    next();
+})
+
 
 //Set MongoDB with Mongoose
 const mongoose = require(`mongoose`);
 mongoose.connect("mongodb://localhost:27017/yelp-camp", {
     useNewUrlParser: true,
     useUnifiedTopology: true
-});
+})
 
 
 //呼叫Schema
@@ -73,6 +96,7 @@ app.post(`/campgrounds`, SchemaValidation, catchAsync(async (req, res) => {
 
     const newCamp = new Campground(req.body)
     await newCamp.save()
+    req.flash("successTag", "Successfully made a campground")
     res.redirect(`/campgrounds/${newCamp._id}`)
 })
 )
@@ -80,7 +104,10 @@ app.post(`/campgrounds`, SchemaValidation, catchAsync(async (req, res) => {
 app.get(`/campgrounds/:id`, catchAsync(async (req, res) => {
     const { id } = req.params
     const campground = await Campground.findById(id).populate("reviews");
-    console.log(campground)
+    if (!campground) {
+        req.flash("errorTag", "Campground is not exist")
+        return res.redirect(`/campgrounds`)
+    }
     res.render(`campgrounds/show.ejs`, { campground })
 })
 )
@@ -93,14 +120,18 @@ app.get(`/`, (req, res) => {
 app.get(`/campgrounds/:id/edit`, catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id)
+    if (!campground) {
+        req.flash("errorTag", "Campground is not exist")
+        return res.redirect(`/campgrounds`)
+    }
     res.render(`campgrounds/edit.ejs`, { campground })
 })
 )
 
 app.put(`/campgrounds/:id`, SchemaValidation, catchAsync(async (req, res) => {
     const { id } = req.params
-    console.log(req.body)
     const campground = await Campground.findByIdAndUpdate(id, { ...req.body })
+    req.flash("successTag", "Campground is edited.")
     res.redirect(`/campgrounds/${campground._id}`)
 })
 )
@@ -108,6 +139,7 @@ app.put(`/campgrounds/:id`, SchemaValidation, catchAsync(async (req, res) => {
 app.delete(`/campgrounds/:id`, catchAsync(async (req, res) => {
     const { id } = req.params
     await Campground.findByIdAndDelete(id);
+    req.flash("successTag", "Successfully delete a campground")
     res.redirect(`/campgrounds`)
 })
 )
@@ -119,6 +151,7 @@ app.post("/campgrounds/:id/reviews", validateReview, catchAsync(async (req, res)
     campground.reviews.push(newReviews);
     await campground.save();
     await newReviews.save();
+    req.flash("successTag", "Successfully create a review")
     res.redirect(`/campgrounds/${campground._id}`)
 
 }))
@@ -127,6 +160,7 @@ app.delete("/campgrounds/:id/reviews/:reviewId", catchAsync(async (req, res) => 
     const { id, reviewId } = req.params;
     await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } })
     await Review.findByIdAndDelete(reviewId)
+    req.flash("successTag", "Successfully delete a review")
     res.redirect(`/campgrounds/${id}`)
 }))
 

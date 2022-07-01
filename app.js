@@ -79,7 +79,8 @@ app.post(`/campgrounds`, SchemaValidation, catchAsync(async (req, res) => {
 //app.new 必須在app.get--id前面
 app.get(`/campgrounds/:id`, catchAsync(async (req, res) => {
     const { id } = req.params
-    const campground = await Campground.findById(id);
+    const campground = await Campground.findById(id).populate("reviews");
+    console.log(campground)
     res.render(`campgrounds/show.ejs`, { campground })
 })
 )
@@ -114,12 +115,19 @@ app.delete(`/campgrounds/:id`, catchAsync(async (req, res) => {
 app.post("/campgrounds/:id/reviews", validateReview, catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id)
-    const newReviews = new Review(req.body.review)
+    const newReviews = new Review(req.body)
     campground.reviews.push(newReviews);
     await campground.save();
     await newReviews.save();
     res.redirect(`/campgrounds/${campground._id}`)
 
+}))
+
+app.delete("/campgrounds/:id/reviews/:reviewId", catchAsync(async (req, res) => {
+    const { id, reviewId } = req.params;
+    await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } })
+    await Review.findByIdAndDelete(reviewId)
+    res.redirect(`/campgrounds/${id}`)
 }))
 
 app.all(`* `, (req, res, next) => {
@@ -132,6 +140,7 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("error.ejs", { err })
 
 })
+
 
 app.listen(3000, () => {
     console.log(`Connected to Port 3000`)
